@@ -39,9 +39,9 @@
     var map = L.map('map', { zoomControl: false }).setView([36.5, 127.8], 7);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
 
-    // 논산독일보청기 고유 ID 및 뉴히어링 개별 지점 데이터
+    // 데이터 구성: 논산센터는 direct(상세페이지 바로가기)로 설정
     const allCenters = [
-        {brand: '독일', name: "논산센터", type: "place", id: "1647414986", addr: "충남 논산시 중앙로480번길 10 1층", lat: 36.2044, lng: 127.0845, tel: "0507-1309-3598"},
+        {brand: '독일', name: "논산센터", type: "direct", id: "1647414986", addr: "충남 논산시 중앙로480번길 10 1층", lat: 36.2044, lng: 127.0845, tel: "0507-1309-3598"},
         {brand: '박진우', name: "부여센터", type: "search", id: "부여박진우보청기", addr: "충남 부여군 부여읍 사비로 63", lat: 36.2801, lng: 126.9142, tel: "0507-1336-4507"},
         {brand: '박진우', name: "보령센터", type: "search", id: "보령박진우보청기", addr: "충남 보령시 번영로 24 1층", lat: 36.3503, lng: 126.5912, tel: "0507-1366-7849"},
         {brand: '박진우', name: "광주센터", type: "search", id: "박진우보청기윤소희청각재활센터", addr: "광주 광산구 장신로 143 1층 103호", lat: 35.1918, lng: 126.8241, tel: "0507-1412-7696"},
@@ -66,8 +66,8 @@
     allCenters.forEach(c => {
         const color = c.brand === '뉴히어링' ? '#E31837' : '#2A52BE';
         
-        // 링크 생성 로직 수정: place ID가 있으면 바로 이동, 없으면 검색
-        const naverLink = c.type === 'place' 
+        // 링크 생성 로직: type이 direct면 상세페이지(place)로 바로 연결
+        const naverLink = c.type === 'direct' 
             ? `https://map.naver.com/p/entry/place/${c.id}` 
             : `https://map.naver.com/v5/search/${encodeURIComponent(c.id)}`;
 
