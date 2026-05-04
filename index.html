@@ -8,25 +8,37 @@
     <style>
         :root { --park-blue: #2A52BE; --new-red: #E31837; --naver-green: #03C75A; }
         body { margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; background: #f0f2f5; overflow: hidden; }
-        #map { height: 100vh; width: calc(100% - 400px); margin-left: 400px; }
+        
+        /* [PC 버전] 지도와 사이드바 배치 */
+        #map { height: 100vh; width: calc(100% - 400px); margin-left: 400px; display: block; }
         .sidebar { position: absolute; top: 0; left: 0; width: 400px; height: 100vh; background: white; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .header { padding: 20px; border-bottom: 1px solid #eee; }
-        .header h2 { margin: 0 0 12px 0; font-size: 19px; color: #333; }
+        
+        .header { padding: 20px; border-bottom: 1px solid #eee; background: #fff; }
+        .header h2 { margin: 0 0 12px 0; font-size: 19px; color: #333; letter-spacing: -0.5px; }
         .search-box { padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; font-size: 14px; }
+        
         .list-container { flex: 1; overflow-y: auto; padding: 12px; background: #fafafa; }
-        .center-card { background: #fff; border-radius: 10px; border: 1px solid #eee; margin-bottom: 12px; padding: 18px; transition: all 0.2s; }
+        .center-card { background: #fff; border-radius: 10px; border: 1px solid #eee; margin-bottom: 12px; padding: 18px; transition: all 0.2s; cursor: pointer; }
         .center-card:hover { border-color: var(--park-blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        
         .card-brand { font-size: 12px; font-weight: bold; margin-bottom: 4px; display: block; }
         .card-title { font-weight: bold; font-size: 17px; color: #333; margin-bottom: 8px; display: block; }
-        .card-addr { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4; }
-        .btn-group { display: flex; gap: 8px; }
-        .btn { flex: 1; padding: 10px; text-align: center; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #ddd; color: #555; background: #fff; }
-        .btn-map { background: #f0fff4; border-color: var(--naver-green); color: var(--naver-green); }
+        .card-addr { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4; word-break: keep-all; }
         
-        /* 모바일 대응 */
+        .btn-group { display: flex; gap: 8px; }
+        .btn { flex: 1; padding: 11px; text-align: center; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; border: 1px solid #ddd; color: #555; background: #fff; transition: 0.2s; }
+        .btn:active { background: #f9f9f9; }
+        .btn-map { background: #f0fff4; border-color: var(--naver-green); color: var(--naver-green); }
+
+        /* [모바일 버전] 핵심 수정 사항 */
         @media (max-width: 768px) {
-            .sidebar { width: 100%; height: 40%; bottom: 0; top: auto; }
-            #map { width: 100%; height: 60%; margin-left: 0; }
+            #map { display: none !important; } /* 지도를 아예 숨김 */
+            .sidebar { width: 100%; position: relative; height: 100vh; box-shadow: none; }
+            body { overflow: auto; } /* 모바일에서 스크롤 허용 */
+            .header { position: sticky; top: 0; z-index: 1001; }
+            .list-container { padding-bottom: 30px; }
+            .center-card { padding: 20px; }
+            .card-title { font-size: 18px; }
         }
     </style>
 </head>
@@ -43,9 +55,13 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 초기 지도 설정
-    var map = L.map('map', { zoomControl: false }).setView([36.3, 127.3], 8);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+    // PC 환경에서만 지도 초기화 (모바일 리소스 절약)
+    var map;
+    var markers = [];
+    if (window.innerWidth > 768) {
+        map = L.map('map', { zoomControl: false }).setView([36.3, 127.3], 8);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+    }
 
     const allCenters = [
         {brand: '독일', name: "논산센터", keyword: "논산독일보청기", addr: "충남 논산시 중앙로480번길 10 1층", lat: 36.2044, lng: 127.0845, tel: "0507-1309-3598"},
@@ -70,56 +86,49 @@
         {brand: '뉴히어링', name: "강동센터", keyword: "뉴히어링보청기 강동센터", addr: "서울 강동구 양재대로 1452", lat: 37.5352, lng: 127.1324, tel: "010-5689-2344"}
     ];
 
-    const markers = [];
-
-    // 리스트 생성 및 지도 마커 연동
     const listDiv = document.getElementById('centerList');
     allCenters.forEach((c, index) => {
         const color = c.brand === '뉴히어링' ? '#E31837' : '#2A52BE';
         const naverLink = `https://map.naver.com/v5/search/${encodeURIComponent(c.keyword)}`;
 
-        // 카드 생성
         const card = document.createElement('div');
         card.className = 'center-card';
-        card.onclick = () => moveToCenter(c.lat, c.lng, index); // 클릭 시 지도 이동 함수 호출
+        card.onclick = () => { if(map) moveToCenter(c.lat, c.lng, index); };
         card.innerHTML = `
             <span class="card-brand" style="color:${color}">${c.brand}보청기</span>
             <span class="card-title">${c.name}</span>
             <div class="card-addr">${c.addr}</div>
             <div class="btn-group">
-                <a href="tel:${c.tel.replace(/-/g, '')}" class="btn" onclick="event.stopPropagation()">통화</a>
+                <a href="tel:${c.tel.replace(/-/g, '')}" class="btn" onclick="event.stopPropagation()">통화하기</a>
                 <a href="${naverLink}" target="_blank" class="btn btn-map" onclick="event.stopPropagation()">네이버 지도</a>
             </div>
         `;
         listDiv.appendChild(card);
         
-        // 지도 마커 추가
-        const marker = L.circleMarker([c.lat, c.lng], { 
-            radius: 8, 
-            fillColor: color, 
-            color: "#fff", 
-            weight: 2, 
-            fillOpacity: 0.9 
-        }).addTo(map).bindPopup(`<b>${c.brand}보청기 ${c.name}</b>`);
-        
-        markers.push(marker);
+        if (map) {
+            const marker = L.circleMarker([c.lat, c.lng], { 
+                radius: 8, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.9 
+            }).addTo(map).bindPopup(`<b>${c.brand}보청기 ${c.name}</b>`);
+            markers.push(marker);
+        }
     });
 
-    // 지도 이동 함수 (부드럽게 이동)
     function moveToCenter(lat, lng, index) {
+        if (!map) return;
         map.flyTo([lat, lng], 15, { animate: true, duration: 1.5 });
         markers[index].openPopup();
     }
 
-    // 검색 필터링
     function filterList() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const cards = document.querySelectorAll('.center-card');
         allCenters.forEach((c, i) => {
             const match = c.name.toLowerCase().includes(q) || c.addr.toLowerCase().includes(q);
             cards[i].style.display = match ? 'block' : 'none';
-            if (match) markers[i].addTo(map);
-            else map.removeLayer(markers[i]);
+            if (map) {
+                if (match) markers[i].addTo(map);
+                else map.removeLayer(markers[i]);
+            }
         });
     }
 </script>
