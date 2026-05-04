@@ -74,9 +74,9 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
 
-    // 최신 데이터 반영 (박진우/독일/뉴히어링 20개 지점)
+    // 네이버 지도 검색 최적화 데이터
     const allCenters = [
-        // 박진우/독일 보청기 그룹
+        // 박진우/독일 그룹 (searchName을 실제 네이버 등록 명칭으로 고정)
         {brand: '박진우', name: "부여센터", searchName: "부여박진우보청기", addr: "충남 부여군 부여읍 사비로 63", lat: 36.2801, lng: 126.9142, tel: "0507-1336-4507"},
         {brand: '박진우', name: "보령센터", searchName: "보령박진우보청기", addr: "충남 보령시 번영로 24 1층", lat: 36.3503, lng: 126.5912, tel: "0507-1366-7849"},
         {brand: '박진우', name: "광주센터", searchName: "박진우보청기윤소희청각재활센터", addr: "광주 광산구 장신로 143 1층 103호", lat: 35.1918, lng: 126.8241, tel: "0507-1412-7696"},
@@ -85,20 +85,20 @@
         {brand: '박진우', name: "군산센터", searchName: "윤선생보청기 박진우보청기", addr: "전북 군산시 구암3.1로 10-3 1호", lat: 35.9892, lng: 126.7324, tel: "0507-1433-1872"},
         {brand: '독일', name: "논산센터", searchName: "논산독일보청기", addr: "충남 논산시 중앙로480번길 10 1층", lat: 36.2044, lng: 127.0845, tel: "0507-1309-3598"},
         
-        // 뉴히어링 보청기 그룹
-        {brand: '뉴히어링', name: "은평센터", searchName: "뉴히어링보청기", addr: "서울 은평구 연서로 130 2층 201호", lat: 37.6022, lng: 126.9292, tel: "0507-1460-0352"},
-        {brand: '뉴히어링', name: "청주센터", searchName: "뉴히어링보청기", addr: "충북 청주시 흥덕구 강서로 118 장한빌딩 3층 302호", lat: 36.6258, lng: 127.4331, tel: "0507-1385-2544"},
-        {brand: '뉴히어링', name: "강북센터", searchName: "뉴히어링보청기", addr: "서울 강북구 삼양로 161 행전빌딩 2층", lat: 37.6254, lng: 127.0271, tel: "0507-1402-2834"},
-        {brand: '뉴히어링', name: "김포센터", searchName: "뉴히어링보청기", addr: "경기 김포시 풍무로 107 303호", lat: 37.6083, lng: 126.7214, tel: "0507-1358-8533"},
-        {brand: '뉴히어링', name: "동대문센터", searchName: "뉴히어링보청기", addr: "서울 동대문구 사가정로 122 (전농동) 2층 203호", lat: 37.5741, lng: 127.0602, tel: "0507-1493-1616"},
-        {brand: '뉴히어링', name: "고양센터", searchName: "뉴히어링 보청기", addr: "경기 고양시 덕양구 충장로 134 101호", lat: 37.6332, lng: 126.8324, tel: "0507-1447-4490"},
-        {brand: '뉴히어링', name: "영등포센터", searchName: "뉴히어링보청기", addr: "서울 영등포구 당산로 166 3층", lat: 37.5273, lng: 126.8962, tel: "0507-1314-8533"},
-        {brand: '뉴히어링', name: "군포센터", searchName: "뉴히어링보청기", addr: "경기 군포시 광정로 80 3층 302호", lat: 37.3512, lng: 126.9284, tel: "0507-1475-2515"},
-        {brand: '뉴히어링', name: "강남센터", searchName: "뉴히어링보청기", addr: "서울 강남구 삼성로 573 3층", lat: 37.5114, lng: 127.0461, tel: "0507-1478-5703"},
-        {brand: '뉴히어링', name: "부천센터", searchName: "뉴히어링보청기", addr: "경기 부천시 소사구 경인로 509 2층 201호", lat: 37.4812, lng: 126.8123, tel: "0507-1301-9683"},
-        {brand: '뉴히어링', name: "강릉센터", searchName: "뉴히어링보청기", addr: "강원 강릉시 경강로 2099 1층 1호", lat: 37.7514, lng: 128.8762, tel: "0507-1307-5879"},
-        {brand: '뉴히어링', name: "인천부평센터", searchName: "뉴히어링보청기", addr: "인천 부평구 부평대로 6 3층 301호", lat: 37.4912, lng: 126.7241, tel: "0507-1315-8691"},
-        {brand: '뉴히어링', name: "강동센터", searchName: "뉴히어링보청기", addr: "서울 강동구 양재대로 1452 2층", lat: 37.5352, lng: 127.1324, tel: "010-5689-2344"}
+        // 뉴히어링 그룹 (searchName을 브랜드명 + 센터명 조합으로 명확히 수정)
+        {brand: '뉴히어링', name: "은평센터", searchName: "뉴히어링보청기 은평센터", addr: "서울 은평구 연서로 130 2층 201호", lat: 37.6022, lng: 126.9292, tel: "0507-1460-0352"},
+        {brand: '뉴히어링', name: "청주센터", searchName: "뉴히어링보청기 청주센터", addr: "충북 청주시 흥덕구 강서로 118 장한빌딩 3층 302호", lat: 36.6258, lng: 127.4331, tel: "0507-1385-2544"},
+        {brand: '뉴히어링', name: "강북센터", searchName: "뉴히어링보청기 강북센터", addr: "서울 강북구 삼양로 161 행전빌딩 2층", lat: 37.6254, lng: 127.0271, tel: "0507-1402-2834"},
+        {brand: '뉴히어링', name: "김포센터", searchName: "뉴히어링보청기 김포센터", addr: "경기 김포시 풍무로 107 303호", lat: 37.6083, lng: 126.7214, tel: "0507-1358-8533"},
+        {brand: '뉴히어링', name: "동대문센터", searchName: "뉴히어링보청기 동대문센터", addr: "서울 동대문구 사가정로 122 (전농동) 2층 203호", lat: 37.5741, lng: 127.0602, tel: "0507-1493-1616"},
+        {brand: '뉴히어링', name: "고양센터", searchName: "뉴히어링보청기 고양센터", addr: "경기 고양시 덕양구 충장로 134 101호", lat: 37.6332, lng: 126.8324, tel: "0507-1447-4490"},
+        {brand: '뉴히어링', name: "영등포센터", searchName: "뉴히어링보청기 영등포센터", addr: "서울 영등포구 당산로 166 3층", lat: 37.5273, lng: 126.8962, tel: "0507-1314-8533"},
+        {brand: '뉴히어링', name: "군포센터", searchName: "뉴히어링보청기 군포센터", addr: "경기 군포시 광정로 80 3층 302호", lat: 37.3512, lng: 126.9284, tel: "0507-1475-2515"},
+        {brand: '뉴히어링', name: "강남센터", searchName: "뉴히어링보청기 강남센터", addr: "서울 강남구 삼성로 573 3층", lat: 37.5114, lng: 127.0461, tel: "0507-1478-5703"},
+        {brand: '뉴히어링', name: "부천센터", searchName: "뉴히어링보청기 부천센터", addr: "경기 부천시 소사구 경인로 509 2층 201호", lat: 37.4812, lng: 126.8123, tel: "0507-1301-9683"},
+        {brand: '뉴히어링', name: "강릉센터", searchName: "뉴히어링보청기 강릉센터", addr: "강원 강릉시 경강로 2099 1층 1호", lat: 37.7514, lng: 128.8762, tel: "0507-1307-5879"},
+        {brand: '뉴히어링', name: "인천부평센터", searchName: "뉴히어링보청기 인천부평센터", addr: "인천 부평구 부평대로 6 3층 301호", lat: 37.4912, lng: 126.7241, tel: "0507-1315-8691"},
+        {brand: '뉴히어링', name: "강동센터", searchName: "뉴히어링보청기 강동센터", addr: "서울 강동구 양재대로 1452 2층", lat: 37.5352, lng: 127.1324, tel: "010-5689-2344"}
     ];
 
     const markers = [];
@@ -118,8 +118,7 @@
                 <span class="popup-tel">📞 ${c.tel}</span>
             `);
 
-            const query = c.searchName ? c.searchName : (c.brand + "보청기 " + c.name);
-            const naverLink = `https://map.naver.com/v5/search/${encodeURIComponent(query)}`;
+            const naverLink = `https://map.naver.com/v5/search/${encodeURIComponent(c.searchName)}`;
 
             const card = document.createElement('div');
             card.className = 'center-card';
